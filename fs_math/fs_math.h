@@ -12,6 +12,7 @@
 double fs_sqrt(double x);
 double fs_log(double x);
 double fs_log10(double x);
+
 /*
 ** exp(x) = 1 + x + x^2/2! + x^3/3! + ...
 */
@@ -20,6 +21,7 @@ double fs_modf(double value, double *iptr);
 double fs_fmod(double x, double y);
 double fs_pow(double x, double y);
 double fs_cos(double x);
+
 /*
 ** C99
 */

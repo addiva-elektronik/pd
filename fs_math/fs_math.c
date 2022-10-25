@@ -16,27 +16,31 @@ static long double fs_pil(void);
 
 double fs_sqrt(double x)
 {
-    int n;
     double a, b;
+    int n;
 
     if (x > 0 && DBL_MAX >= x) {
         for (n = 0; x > 2; x /= 4) {
             ++n;
         }
+
         while (0.5 > x) {
             --n;
             x *= 4;
         }
+
         a = x;
         b = (1 + x) / 2;
         do {
             x = b;
             b = (a / x + x) / 2;
         } while (x > b);
+
         while (n > 0) {
             x *= 2;
             --n;
         }
+
         while (0 > n) {
             x /= 2;
             ++n;
@@ -46,15 +50,17 @@ double fs_sqrt(double x)
             x = DBL_MAX;
         }
     }
+
     return x;
 }
 
 double fs_log(double x)
 {
-    int n;
-    double a, b, c, epsilon;
+    static int initialized = 0;
     static double A, B, C;
-    static int initialized;
+    double a, b, c;
+    double epsilon;
+    int n;
 
     if (x > 0 && DBL_MAX >= x) {
         if (!initialized) {
@@ -63,13 +69,16 @@ double fs_log(double x)
             B = A / 2;
             C = fs_log(A);
         }
+
         for (n = 0; x > A; x /= 2) {
             ++n;
         }
+
         while (B > x) {
             --n;
             x *= 2;
         }
+
         a = (x - 1) / (x + 1);
         x = C * n + a;
         c = a * a;
@@ -79,6 +88,7 @@ double fs_log(double x)
             if (epsilon > 0) {
                 epsilon = -epsilon;
             }
+
             do {
                 n += 2;
                 a *= c;
@@ -89,6 +99,7 @@ double fs_log(double x)
             if (0 > epsilon) {
                 epsilon = -epsilon;
             }
+
             do {
                 n += 2;
                 a *= c;
@@ -100,27 +111,30 @@ double fs_log(double x)
     } else {
         x = -DBL_MAX;
     }
+
     return x;
 }
 
 double fs_log10(double x)
 {
+    static int initialized = 0;
     static double log_10;
-    static int initialized;
 
     if (!initialized) {
         initialized = 1;
         log_10 = fs_log(10);
     }
+
     return x > 0 && DBL_MAX >= x ? fs_log(x) / log_10 : fs_log(x);
 }
 
 double fs_exp(double x)
 {
+    static int initialized = 0;
+    static double x_max, x_min;
+    static double epsilon;
     unsigned n, square;
     double b, e;
-    static double x_max, x_min, epsilon;
-    static int initialized;
 
     if (!initialized) {
         initialized = 1;
@@ -128,14 +142,17 @@ double fs_exp(double x)
         x_min = fs_log(DBL_MIN);
         epsilon = DBL_EPSILON / 4;
     }
+
     if (x_max >= x && x >= x_min) {
         for (square = 0; x > 1; x /= 2) {
             ++square;
         }
+
         while (-1 > x) {
             ++square;
             x /= 2;
         }
+
         e = b = n = 1;
         do {
             b /= n++;
@@ -145,23 +162,26 @@ double fs_exp(double x)
             b *= x;
             e += b;
         } while (b > epsilon);
+
         while (square-- != 0) {
             e *= e;
         }
     } else {
         e = x > 0 ? DBL_MAX : 0;
     }
+
     return e;
 }
 
 double fs_modf(double value, double *iptr)
 {
-    double a, b;
     const double c = value;
+    double a, b;
 
     if (0 > c) {
         value = -value;
     }
+
     if (DBL_MAX >= value) {
         for (*iptr = 0; value >= 1; value -= b) {
             a = value / 2;
@@ -175,28 +195,33 @@ double fs_modf(double value, double *iptr)
         *iptr = value;
         value = 0;
     }
+
     if (0 > c) {
         *iptr = -*iptr;
         value = -value;
     }
+
     return value;
 }
 
 double fs_fmod(double x, double y)
 {
-    double a, b;
     const double c = x;
+    double a, b;
 
     if (0 > c) {
         x = -x;
     }
+
     if (0 > y) {
         y = -y;
     }
+
     if (y != 0 && DBL_MAX >= y && DBL_MAX >= x) {
         while (x >= y) {
             a = x / 2;
             b = y;
+
             while (a >= b) {
                 b *= 2;
             }
@@ -205,6 +230,7 @@ double fs_fmod(double x, double y)
     } else {
         x = 0;
     }
+
     return 0 > c ? -x : x;
 }
 
@@ -223,15 +249,17 @@ double fs_pow(double x, double y)
             p =  fs_exp(fs_log( x) * y);
         }
     }
+
     return p;
 }
 
 static double fs_pi(void)
 {
-    unsigned n;
-    double a, b, epsilon;
-    static double p;
     static int initialized;
+    static double p;
+    unsigned int n;
+    double epsilon;
+    double a, b;
 
     if (!initialized) {
         initialized = 1;
@@ -247,6 +275,7 @@ static double fs_pi(void)
             n += 2;
             p += b;
         } while (b > epsilon);
+
         epsilon = DBL_EPSILON / 2;
         n = 1;
         a = 2;
@@ -261,20 +290,22 @@ static double fs_pi(void)
         } while (b > epsilon);
         p *= 4;
     }
+
     return p;
 }
 
 double fs_cos(double x)
 {
-    unsigned n;
-    int negative, sine;
-    double a, b, c;
     static double pi, two_pi, half_pi, third_pi, epsilon;
-    static int initialized;
+    static int initialized = 0;
+    int negative, sine;
+    unsigned int n;
+    double a, b, c;
 
     if (0 > x) {
         x = -x;
     }
+
     if (DBL_MAX >= x) {
         if (!initialized) {
             initialized = 1;
@@ -284,24 +315,29 @@ double fs_cos(double x)
             third_pi    = pi / 3;
             epsilon     = DBL_EPSILON / 2;
         }
+
         if (x > two_pi) {
             x = fs_fmod(x, two_pi);
         }
+
         if (x > pi) {
             x = two_pi - x;
         }
+
         if (x > half_pi) {
             x = pi - x;
             negative = 1;
         } else {
             negative = 0;
         }
+
         if (x > third_pi) {
             x = half_pi - x;
             sine = 1;
         } else {
             sine = 0;
         }
+
         c = x * x;
         x = n = 0;
         a = 1;
@@ -316,34 +352,38 @@ double fs_cos(double x)
             a /= ++n;
             x += b;
         } while (b > epsilon);
+
         if (sine) {
             x = fs_sqrt((1 - x) * (1 + x));
         }
+
         if (negative) {
             x = -x;
         }
     } else {
         x = -DBL_MAX;
     }
+
     return x;
 }
 
 double fs_log2(double x)
 {
+    static int initialized = 0;
     static double log_2;
-    static int initialized;
 
     if (!initialized) {
         initialized = 1;
         log_2 = fs_log(2);
     }
+
     return x > 0 && DBL_MAX >= x ? fs_log(x) / log_2 : fs_log(x);
 }
 
 double fs_exp2(double x)
 {
+    static int initialized = 0;
     static double log_2;
-    static int initialized;
 
     if (!initialized) {
         initialized = 1;
@@ -369,32 +409,37 @@ long double fs_powl(long double x, long double y)
             p = 0;
         }
     }
+
     return p;
 }
 
 long double fs_sqrtl(long double x)
 {
-    long int n;
     long double a, b;
+    long int n;
 
     if (x > 0 && LDBL_MAX >= x) {
         for (n = 0; x > 2; x /= 4) {
             ++n;
         }
+
         while (0.5 > x) {
             --n;
             x *= 4;
         }
+
         a = x;
         b = (1 + x) / 2;
         do {
             x = b;
             b = (a / x + x) / 2;
         } while (x > b);
+
         while (n > 0) {
             x *= 2;
             --n;
         }
+
         while (0 > n) {
             x /= 2;
             ++n;
@@ -404,15 +449,17 @@ long double fs_sqrtl(long double x)
             x = LDBL_MAX;
         }
     }
+
     return x;
 }
 
 long double fs_logl(long double x)
 {
-    long int n;
-    long double a, b, c, epsilon;
     static long double A, B, C;
-    static int initialized;
+    static int initialized = 0;
+    long double a, b, c;
+    long double epsilon;
+    long int n;
 
     if (x > 0 && LDBL_MAX >= x) {
         if (!initialized) {
@@ -425,13 +472,16 @@ long double fs_logl(long double x)
             B /= 2;
             C = fs_logl(A);
         }
+
         for (n = 0; x > A; x /= 2) {
             ++n;
         }
+
         while (B > x) {
             --n;
             x *= 2;
         }
+
         a = (x - 1) / (x + 1);
         x = C * n + a;
         c = a * a;
@@ -441,6 +491,7 @@ long double fs_logl(long double x)
             if (epsilon > 0) {
                 epsilon = -epsilon;
             }
+
             do {
                 n += 2;
                 a *= c;
@@ -451,6 +502,7 @@ long double fs_logl(long double x)
             if (0 > epsilon) {
                 epsilon = -epsilon;
             }
+
             do {
                 n += 2;
                 a *= c;
@@ -462,15 +514,16 @@ long double fs_logl(long double x)
     } else {
         x = -LDBL_MAX;
     }
+
     return x;
 }
 
 long double fs_expl(long double x)
 {
-    long unsigned n, square;
-    long double b, e;
     static long double x_max, x_min, epsilon;
-    static int initialized;
+    static int initialized = 0;
+    unsigned long n, square;
+    long double b, e;
 
     if (!initialized) {
         initialized = 1;
@@ -478,14 +531,17 @@ long double fs_expl(long double x)
         x_min = fs_logl(LDBL_MIN);
         epsilon = LDBL_EPSILON / 4;
     }
+
     if (x_max >= x && x >= x_min) {
         for (square = 0; x > 1; x /= 2) {
             ++square;
         }
+
         while (-1 > x) {
             ++square;
             x /= 2;
         }
+
         e = b = n = 1;
         do {
             b /= n++;
@@ -495,21 +551,24 @@ long double fs_expl(long double x)
             b *= x;
             e += b;
         } while (b > epsilon);
+
         while (square-- != 0) {
             e *= e;
         }
     } else {
         e = x > 0 ? LDBL_MAX : 0;
     }
+
     return e;
 }
 
 static long double fs_pil(void)
 {
-    long unsigned n;
-    long double a, b, epsilon;
+    static int initialized = 0;
     static long double p;
-    static int initialized;
+    long double epsilon;
+    long double a, b;
+    unsigned long n;
 
     if (!initialized) {
         initialized = 1;
@@ -525,6 +584,7 @@ static long double fs_pil(void)
             n += 2;
             p += b;
         } while (b > epsilon);
+
         epsilon = LDBL_EPSILON / 2;
         n = 1;
         a = 2;
@@ -539,20 +599,22 @@ static long double fs_pil(void)
         } while (b > epsilon);
         p *= 4;
     }
+
     return p;
 }
 
 long double fs_cosl(long double x)
 {
-    long unsigned n;
-    int negative, sine;
-    long double a, b, c;
     static long double pi, two_pi, half_pi, third_pi, epsilon;
-    static int initialized;
+    static int initialized = 0;
+    long double a, b, c;
+    int negative, sine;
+    unsigned long n;
 
     if (0 > x) {
         x = -x;
     }
+
     if (LDBL_MAX >= x) {
         if (!initialized) {
             initialized = 1;
@@ -562,24 +624,29 @@ long double fs_cosl(long double x)
             third_pi    = pi / 3;
             epsilon     = LDBL_EPSILON / 2;
         }
+
         if (x > two_pi) {
             x = fs_fmodl(x, two_pi);
         }
+
         if (x > pi) {
             x = two_pi - x;
         }
+
         if (x > half_pi) {
             x = pi - x;
             negative = 1;
         } else {
             negative = 0;
         }
+
         if (x > third_pi) {
             x = half_pi - x;
             sine = 1;
         } else {
             sine = 0;
         }
+
         c = x * x;
         x = n = 0;
         a = 1;
@@ -594,33 +661,39 @@ long double fs_cosl(long double x)
             a /= ++n;
             x += b;
         } while (b > epsilon);
+
         if (sine) {
             x = fs_sqrtl((1 - x) * (1 + x));
         }
+
         if (negative) {
             x = -x;
         }
     } else {
         x = -LDBL_MAX;
     }
+
     return x;
 }
 
 long double fs_fmodl(long double x, long double y)
 {
-    long double a, b;
     const long double c = x;
+    long double a, b;
 
     if (0 > c) {
         x = -x;
     }
+
     if (0 > y) {
         y = -y;
     }
+
     if (y != 0 && LDBL_MAX >= y && LDBL_MAX >= x) {
         while (x >= y) {
             a = x / 2;
             b = y;
+
             while (a >= b) {
                 b *= 2;
             }
@@ -629,6 +702,7 @@ long double fs_fmodl(long double x, long double y)
     } else {
         x = 0;
     }
+
     return 0 > c ? -x : x;
 }
 
